@@ -1,10 +1,10 @@
-import { ConversationType, User } from './types';
+import { Conversation, User } from './types';
 
 export const getRecipientFromConversation = (
-  conversation?: ConversationType,
+  conversation?: Conversation,
   user?: User
 ) => {
-  return user?.userId === conversation?.creator.userId
+  return user?.id === conversation?.creator.id
     ? conversation?.recipient
     : conversation?.creator;
 };

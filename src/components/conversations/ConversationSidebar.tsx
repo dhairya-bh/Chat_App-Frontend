@@ -1,36 +1,28 @@
 import {
   ConversationSidebarContainer,
   ConversationSidebarHeader,
-  ConversationSidebarItem,
   ConversationSidebarStyle,
-} from "../../utils/styles";
-import { TbEdit } from "react-icons/tb";
-import { FC, useContext, useState } from "react";
-import { ConversationType } from "../../utils/types";
-import styles from "./index.module.scss";
-import { useNavigate } from "react-router-dom";
-import { CreateConversationModal } from "../modals/CreateConversationModal";
-import { AuthContext } from "../../utils/context/AuthContext";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
+} from '../../utils/styles';
+import { TbEdit } from 'react-icons/tb';
+import { useState } from 'react';
+import { CreateConversationModal } from '../modals/CreateConversationModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { ConversationSelected } from './ConversationSelected';
+import { ConversationSidebarItem } from './ConversationSidebarItem';
+import { GroupSidebarItem } from '../groups/GroupSidebarItem';
 
-type Props = {
-  conversations: ConversationType[];
-};
-
-export const ConversationSidebar: FC<Props> = () => {
-  const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+export const ConversationSidebar = () => {
   const [showModal, setShowModal] = useState(false);
   const conversations = useSelector(
     (state: RootState) => state.conversation.conversations
   );
+  const groups = useSelector((state: RootState) => state.groups.groups);
 
-  const getDisplayUser = (conversation: ConversationType) => {
-    return conversation.creator.userId === user?.userId
-      ? conversation.recipient
-      : conversation.creator;
-  };
+  const selectedConversationType = useSelector(
+    (state: RootState) => state.selectedConversationType.type
+  );
+
   return (
     <>
       {showModal && <CreateConversationModal setShowModal={setShowModal} />}
@@ -38,28 +30,23 @@ export const ConversationSidebar: FC<Props> = () => {
         <ConversationSidebarHeader>
           <h1>Conversations</h1>
           <div onClick={() => setShowModal(!showModal)}>
-            <TbEdit size={30} />
+            <TbEdit size={40} />
           </div>
         </ConversationSidebarHeader>
         <ConversationSidebarContainer>
-          {conversations.map((conversation) => (
-            <ConversationSidebarItem
-              key={conversation.id}
-              onClick={() => navigate(`/conversations/${conversation.id}`)}
-            >
-              <div className={styles.conversationAvatar}></div>
-              <div>
-                <span className={styles.conversationName}>
-                  {`${getDisplayUser(conversation).firstName} ${
-                    getDisplayUser(conversation).lastName
-                  }`}
-                </span>
-                <span className={styles.conversationLastMessage}>
-                  {conversation.lastMessageSent?.content}
-                </span>
-              </div>
-            </ConversationSidebarItem>
-          ))}
+          <ConversationSelected />
+          <section>
+            {selectedConversationType === 'private'
+              ? conversations.map((conversation) => (
+                  <ConversationSidebarItem
+                    key={conversation.id}
+                    conversation={conversation}
+                  />
+                ))
+              : groups.map((group) => (
+                  <GroupSidebarItem key={group.id} group={group} />
+                ))}
+          </section>
         </ConversationSidebarContainer>
       </ConversationSidebarStyle>
     </>

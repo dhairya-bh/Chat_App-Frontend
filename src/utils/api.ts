@@ -1,22 +1,24 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from 'axios';
 import {
-  ConversationType,
+  Conversation,
   CreateConversationParams,
   CreateMessageParams,
-  CreateUserDetails,
+  CreateUserParams,
   DeleteMessageParams,
   DeleteMessageResponse,
   EditMessagePayload,
+  FetchGroupMessagePayload,
   FetchMessagePayload,
+  Group,
   MessageType,
   User,
   UserCredentialsParams,
-} from "./types";
+} from './types';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 const config: AxiosRequestConfig = { withCredentials: true };
 
-export const postRegisterUser = (data: CreateUserDetails) =>
+export const postRegisterUser = (data: CreateUserParams) =>
   axios.post(`${API_URL}/auth/register`, data, config);
 
 export const postLoginUser = (data: UserCredentialsParams) =>
@@ -26,7 +28,7 @@ export const getAuthUser = () =>
   axios.get<User>(`${API_URL}/auth/status`, config);
 
 export const getConversations = () =>
-  axios.get<ConversationType[]>(`${API_URL}/conversations`, config);
+  axios.get<Conversation[]>(`${API_URL}/conversations`, config);
 
 export const getConversationMessages = (conversationId: string) =>
   axios.get<FetchMessagePayload>(
@@ -43,8 +45,9 @@ export const postNewMessage = (
     data,
     config
   );
+
 export const postNewConversation = (data: CreateConversationParams) =>
-  axios.post(`${API_URL}/conversations`, data, config);
+  axios.post<Conversation>(`${API_URL}/conversations`, data, config);
 
 export const deleteMessage = ({
   conversationId,
@@ -55,13 +58,22 @@ export const deleteMessage = ({
     config
   );
 
-  export const editMessage = ({
-    content,
-    conversationId,
-    messageId,
-  }: EditMessagePayload) =>
-    axios.patch<MessageType>(
-      `${API_URL}/conversations/${conversationId}/messages/${messageId}`,
-      { content },
-      config
-    );
+export const editMessage = ({
+  content,
+  conversationId,
+  messageId,
+}: EditMessagePayload) =>
+  axios.patch<MessageType>(
+    `${API_URL}/conversations/${conversationId}/messages/${messageId}`,
+    { content },
+    config
+  );
+
+export const fetchGroups = () =>
+  axios.get<Group[]>(`${API_URL}/groups`, config);
+
+export const fetchGroupMessages = (id: string) =>
+  axios.get<FetchGroupMessagePayload>(
+    `${API_URL}/groups/${id}/messages`,
+    config
+  );

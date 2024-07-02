@@ -1,9 +1,15 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSelector,
+  createSlice,
+  PayloadAction,
+} from '@reduxjs/toolkit';
+import { RootState } from '.';
 import {
   deleteMessage as deleteMessageAPI,
   editMessage as editMessageAPI,
   getConversationMessages,
-} from "../utils/api";
+} from '../utils/api';
 import {
   ConversationMessage,
   DeleteMessageParams,
@@ -11,7 +17,7 @@ import {
   EditMessagePayload,
   MessageEventPayload,
   MessageType,
-} from "../utils/types";
+} from '../utils/types';
 
 export interface MessagesState {
   messages: ConversationMessage[];
@@ -24,31 +30,33 @@ const initialState: MessagesState = {
 };
 
 export const fetchMessagesThunk = createAsyncThunk(
-  "messages/fetch",
+  'messages/fetch',
   (id: string) => {
     return getConversationMessages(id);
   }
 );
 
 export const deleteMessageThunk = createAsyncThunk(
-  "messages/delete",
+  'messages/delete',
   (params: DeleteMessageParams) => {
     return deleteMessageAPI(params);
   }
 );
 
 export const editMessageThunk = createAsyncThunk(
-  "messages/edit",
+  'messages/edit',
   (params: EditMessagePayload) => {
     return editMessageAPI(params);
   }
 );
 
 export const messagesSlice = createSlice({
-  name: "messages",
+  name: 'messages',
   initialState,
   reducers: {
     addMessage: (state, action: PayloadAction<MessageEventPayload>) => {
+      console.log(state);
+      console.log(action);
       const { conversation, message } = action.payload;
       const conversationMessage = state.messages.find(
         (cm) => cm.id === conversation.id
@@ -56,7 +64,7 @@ export const messagesSlice = createSlice({
       conversationMessage?.messages.unshift(message);
     },
     deleteMessage: (state, action: PayloadAction<DeleteMessageResponse>) => {
-      console.log("Inside deleteMessage reducer");
+      console.log('Inside deleteMessage reducer');
       const { payload } = action;
       const conversationMessages = state.messages.find(
         (cm) => cm.id === payload.conversationId
@@ -65,6 +73,9 @@ export const messagesSlice = createSlice({
       const messageIndex = conversationMessages.messages.findIndex(
         (m) => m.id === payload.messageId
       );
+      console.log(conversationMessages);
+      console.log(messageIndex);
+      console.log(payload);
       conversationMessages.messages.splice(messageIndex, 1);
     },
     editMessage: (state, action: PayloadAction<MessageType>) => {
@@ -87,7 +98,7 @@ export const messagesSlice = createSlice({
         const index = state.messages.findIndex((cm) => cm.id === id);
         const exists = state.messages.find((cm) => cm.id === id);
         if (exists) {
-          console.log("exists");
+          console.log('exists');
           state.messages[index] = action.payload.data;
         } else {
           state.messages.push(action.payload.data);
@@ -105,9 +116,8 @@ export const messagesSlice = createSlice({
         conversationMessages?.messages.splice(messageIndex, 1);
       })
       .addCase(editMessageThunk.fulfilled, (state, action) => {
-        console.log("editMessageThunk.fulfilled");
+        console.log('editMessageThunk.fulfilled');
         const { data: message } = action.payload;
-        console.log(message)
         const { id } = message.conversation;
         const conversationMessage = state.messages.find((cm) => cm.id === id);
         if (!conversationMessage) return;
@@ -116,11 +126,21 @@ export const messagesSlice = createSlice({
         );
         console.log(messageIndex);
         conversationMessage.messages[messageIndex] = message;
-        console.log("Updated Message");
+        console.log('Updated Message');
       });
   },
 });
 
-export const { addMessage, deleteMessage,editMessage } = messagesSlice.actions;
+const selectConversationMessages = (state: RootState) =>
+  state.messages.messages;
+
+const selectConversationMessageId = (state: RootState, id: string) => id;
+
+export const selectConversationMessage = createSelector(
+  [selectConversationMessages, selectConversationMessageId],
+  (conversationMessages, id) => conversationMessages.find((cm) => cm.id === id)
+);
+
+export const { addMessage, deleteMessage, editMessage } = messagesSlice.actions;
 
 export default messagesSlice.reducer;

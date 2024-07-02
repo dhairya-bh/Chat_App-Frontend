@@ -1,58 +1,60 @@
-import { Outlet } from "react-router";
-import { ConversationPanel } from "../../components/conversations/ConversationPanel";
-import { ConversationSidebar } from "../../components/conversations/ConversationSidebar";
-import { Page } from "../../utils/styles";
-import { useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import { ConversationType, MessageEventPayload } from "../../utils/types";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../store";
-import { addConversation, fetchConversationsThunk, updateConversation } from "../../store/conversationSlice";
-import { SocketContext } from "../../utils/context/SocketContext";
-import { addMessage, deleteMessage } from "../../store/messageSlice";
+import { useContext, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Outlet, useParams } from 'react-router-dom';
+import { ConversationPanel } from '../../components/conversations/ConversationPanel';
+import { ConversationSidebar } from '../../components/conversations/ConversationSidebar';
+import { AppDispatch } from '../../store';
+import {
+  addConversation,
+  fetchConversationsThunk,
+  updateConversation,
+} from '../../store/conversationSlice';
+import { addMessage, deleteMessage } from '../../store/messageSlice';
+import { updateType } from '../../store/selectedSlice';
+import { SocketContext } from '../../utils/context/SocketContext';
+import { Page } from '../../utils/styles';
+import { Conversation, MessageEventPayload } from '../../utils/types';
 
 export const ConversationPage = () => {
-    const {id} = useParams();
-    const [conversations,setConversations] = useState<ConversationType[]>([])
-    const dispatch = useDispatch<AppDispatch>();
+  const { id } = useParams();
+  const dispatch = useDispatch<AppDispatch>();
+  const socket = useContext(SocketContext);
 
-    const socket = useContext(SocketContext);
+  useEffect(() => {
+    dispatch(updateType('private'));
+    dispatch(fetchConversationsThunk());
+  }, []);
 
-    const conversationsState = useSelector(
-      (state: RootState) => state.conversation.conversations
-    );
+  useEffect(() => {
+    socket.on('onMessage', (payload: MessageEventPayload) => {
+      console.log('Message Received');
+      const { conversation, message } = payload;
+      console.log(conversation, message);
+      dispatch(addMessage(payload));
+      dispatch(updateConversation(conversation));
+    });
+    socket.on('onConversation', (payload: Conversation) => {
+      console.log('Received onConversation Event');
+      console.log(payload);
+      dispatch(addConversation(payload));
+    });
+    socket.on('onMessageDelete', (payload) => {
+      console.log('Message Deleted');
+      console.log(payload);
+      dispatch(deleteMessage(payload));
+    });
+    return () => {
+      socket.off('connected');
+      socket.off('onMessage');
+      socket.off('onConversation');
+      socket.off('onMessageDelete');
+    };
+  }, [id]);
 
-    useEffect(() => {
-      dispatch(fetchConversationsThunk());
-    }, []);
-
-    useEffect(() => {
-      socket.on('onMessage', (payload: MessageEventPayload) => {
-        console.log('Message Received');
-        const { conversation, message } = payload;
-        dispatch(addMessage(payload));
-        dispatch(updateConversation(conversation));
-      });
-      socket.on('onConversation', (payload: ConversationType) => {
-        console.log('Received onConversation Event');
-        dispatch(addConversation(payload));
-      });
-      socket.on('onMessageDelete', (payload) => {
-        console.log('Message Deleted');
-        dispatch(deleteMessage(payload));
-      });
-      return () => {
-        socket.off('onMessage');
-        socket.off('onConversation');
-        socket.off('onMessageDelete');
-      };
-    }, [id]);
-    
   return (
     <Page>
-      <ConversationSidebar conversations={conversations}/>
       {!id && <ConversationPanel />}
-      <Outlet/>
+      <Outlet />
     </Page>
   );
 };

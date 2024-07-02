@@ -1,31 +1,33 @@
-import React from "react";
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { postRegisterUser } from '../../utils/api';
 import {
   Button,
   InputContainer,
   InputField,
   InputLabel,
-} from "../../utils/styles";
-import styles from "./index.module.scss";
-import { Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { CreateUserDetails } from "../../utils/types";
-import { postRegisterUser } from "../../utils/api";
+} from '../../utils/styles';
+import { CreateUserParams } from '../../utils/types';
+import styles from './index.module.scss';
 
 export const RegisterForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CreateUserDetails>();
-  console.log(errors)
-  const onSubmit = async (data :CreateUserDetails) => {
+  } = useForm<CreateUserParams>();
+
+  console.log(errors);
+
+  const onSubmit = async (data: CreateUserParams) => {
+    console.log(data);
     try {
       await postRegisterUser(data);
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      console.log(err);
     }
-      
   };
+
   return (
     <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <InputContainer>
@@ -33,8 +35,8 @@ export const RegisterForm = () => {
         <InputField
           type="email"
           id="email"
-          {...register("email", {
-            required: "Email is required",
+          {...register('email', {
+            required: 'Email is required',
           })}
         />
       </InputContainer>
@@ -44,9 +46,7 @@ export const RegisterForm = () => {
           <InputField
             type="text"
             id="firstName"
-            {...register("firstName", {
-              required: "First Name is required",
-            })}
+            {...register('firstName', { required: 'First Name is Required' })}
           />
         </InputContainer>
         <InputContainer>
@@ -54,9 +54,7 @@ export const RegisterForm = () => {
           <InputField
             type="text"
             id="lastName"
-            {...register("lastName", {
-              required: "Last Name is required",
-            })}
+            {...register('lastName', { required: 'Last Name is Required' })}
           />
         </InputContainer>
       </section>
@@ -65,12 +63,10 @@ export const RegisterForm = () => {
         <InputField
           type="password"
           id="password"
-          {...register("password", {
-            required: "Password is required",
-          })}
+          {...register('password', { required: 'Password is Required' })}
         />
       </InputContainer>
-      <Button className={styles.button}>Create Account</Button>
+      <Button className={styles.button}>Create My Account</Button>
       <div className={styles.footerText}>
         <span>Already have an account? </span>
         <Link to="/login">

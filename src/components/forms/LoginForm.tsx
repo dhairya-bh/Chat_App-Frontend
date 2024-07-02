@@ -1,15 +1,15 @@
-import React from "react";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { postLoginUser } from '../../utils/api';
 import {
   Button,
   InputContainer,
   InputField,
   InputLabel,
-} from "../../utils/styles";
-import styles from "./index.module.scss";
-import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { UserCredentialsParams } from "../../utils/types";
-import { postLoginUser } from "../../utils/api";
+} from '../../utils/styles';
+import { UserCredentialsParams } from '../../utils/types';
+import styles from './index.module.scss';
 
 export const LoginForm = () => {
   const {
@@ -18,14 +18,16 @@ export const LoginForm = () => {
     formState: { errors },
   } = useForm<UserCredentialsParams>();
   const navigate = useNavigate();
-  const onSubmit = async (data: any) => {
+
+  const onSubmit = async (data: UserCredentialsParams) => {
     try {
       await postLoginUser(data);
-      navigate('/conversations')
-    } catch (error) {
-      console.log(error)
+      navigate('/conversations');
+    } catch (err) {
+      console.log(err);
     }
   };
+
   return (
     <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       <InputContainer>
@@ -33,20 +35,15 @@ export const LoginForm = () => {
         <InputField
           type="email"
           id="email"
-          {...register("email", {
-            required: "Email is required",
-          })}
+          {...register('email', { required: true })}
         />
       </InputContainer>
-
       <InputContainer className={styles.loginFormPassword}>
         <InputLabel htmlFor="password">Password</InputLabel>
         <InputField
           type="password"
           id="password"
-          {...register("password", {
-            required: "Password is required",
-          })}   
+          {...register('password', { required: true })}
         />
       </InputContainer>
       <Button>Login</Button>
