@@ -13,7 +13,7 @@ export type UserCredentialsParams = {
 };
 
 export type User = {
-  id: string;
+  userId: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -64,6 +64,7 @@ export type MessageEventPayload = {
 };
 
 export type CreateMessageParams = {
+  id:string;
   content: string;
 };
 
@@ -78,7 +79,12 @@ export type GroupMessage = {
 };
 
 export type DeleteMessageParams = {
-  conversationId: string;
+  id: string;
+  messageId: string;
+};
+
+export type DeleteGroupMessageParams = {
+  id: string;
   messageId: string;
 };
 
@@ -87,12 +93,17 @@ export type DeleteMessageResponse = {
   messageId: string;
 };
 
+export type DeleteGroupMessageResponse = {
+  groupId: string;
+  messageId: string;
+};
+
 export type MessagePanelBodyProps = {
   isTyping: boolean;
 };
 
 export type EditMessagePayload = {
-  conversationId: string;
+  id: string;
   messageId: string;
   content: string;
 };
@@ -109,7 +120,7 @@ export type Group = {
   title?: string;
   users: User[];
   creator: User;
-  messages: MessageType[];
+  messages: GroupMessageType[];
   createdAt: number;
   lastMessageSent: MessageType;
   lastMessageSentAt: Date;
@@ -118,4 +129,9 @@ export type Group = {
 export type GroupMessageEventPayload = {
   message: GroupMessageType;
   group: Group;
+};
+
+export type CreateGroupParams = {
+  users: string[];
+  title: string;
 };

@@ -5,8 +5,9 @@ import { MessagePanel } from '../../components/messages/MessagePanel';
 import { SocketContext } from '../../utils/context/SocketContext';
 import { ConversationChannelPageStyle } from '../../utils/styles';
 import { AppDispatch } from '../../store';
-import { editMessage, fetchMessagesThunk } from '../../store/messageSlice';
-import { fetchGroupMessagesThunk } from '../../store/groupMessageSlice';
+import {  editGroupMessage, fetchGroupMessagesThunk } from '../../store/groupMessageSlice';
+import {  GroupMessageType } from '../../utils/types';
+import { GroupRecipientsSidebar } from '../../components/sidebars/GroupRecipientSidebar';
 
 export const GroupChannelPage = () => {
   const { id } = useParams();
@@ -23,21 +24,28 @@ export const GroupChannelPage = () => {
 
   useEffect(() => {
     const groupId = id!;
-    console.log(groupId);
     socket.emit('onGroupJoin', { groupId });
+    socket.on('onGroupMessageUpdate', (message: GroupMessageType) => {
+      dispatch(editGroupMessage(message));
+    });
+    
     return () => {
       socket.emit('onGroupLeave', { groupId });
+      socket.off('onGroupMessageUpdate');
     };
   }, [id]);
 
   const sendTypingStatus = () => {};
 
   return (
-    <ConversationChannelPageStyle>
-      <MessagePanel
-        sendTypingStatus={sendTypingStatus}
-        isRecipientTyping={isRecipientTyping}
-      ></MessagePanel>
-    </ConversationChannelPageStyle>
+    <>
+      <ConversationChannelPageStyle>
+        <MessagePanel
+          sendTypingStatus={sendTypingStatus}
+          isRecipientTyping={isRecipientTyping}
+        ></MessagePanel>
+      </ConversationChannelPageStyle>
+      <GroupRecipientsSidebar />
+    </>
   );
 };

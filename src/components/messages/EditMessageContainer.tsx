@@ -9,6 +9,8 @@ import {
   EditMessageInputField,
 } from '../../utils/styles';
 import { EditMessagePayload } from '../../utils/types';
+import { selectType } from '../../store/selectedSlice';
+import { editGroupMessageThunk } from '../../store/groupMessageSlice';
 
 type Props = {
   onEditMessageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -16,26 +18,28 @@ type Props = {
 export const EditMessageContainer: FC<Props> = ({ onEditMessageChange }) => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
+  const conversationType = useSelector((state: RootState) => selectType(state));
   const { messageBeingEdited } = useSelector(
     (state: RootState) => state.messageContainer
   );
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(messageBeingEdited);
-    console.log('Submitting Edit');
     if (!messageBeingEdited) {
-      console.log('messageBeingEdited is undefined... Returning');
       return;
     }
     const params: EditMessagePayload = {
-      conversationId: id!,
+      id: id!,
       messageId: messageBeingEdited.id,
       content: messageBeingEdited.content,
     };
-    dispatch(editMessageThunk(params)).finally(() =>
-      dispatch(setIsEditing(false))
-    );
+    conversationType === 'private'
+      ? dispatch(editMessageThunk(params)).finally(() =>
+          dispatch(setIsEditing(false))
+        )
+      : dispatch(editGroupMessageThunk(params)).finally(() =>
+          dispatch(setIsEditing(false))
+        );
   };
 
   return (

@@ -4,7 +4,7 @@ export const getRecipientFromConversation = (
   conversation?: Conversation,
   user?: User
 ) => {
-  return user?.id === conversation?.creator.id
+  return user?.userId === conversation?.creator.userId
     ? conversation?.recipient
     : conversation?.creator;
 };

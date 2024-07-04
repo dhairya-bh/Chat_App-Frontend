@@ -36,7 +36,7 @@ export const FormattedMessage: React.FC<FormattedMessageProps> = ({
           <span
             className="authorName"
             style={{
-              color: user?.id === message.author.id ? '#989898' : '#5E8BFF',
+              color: user?.userId === message.author.userId ? '#989898' : '#5E8BFF',
             }}
           >
             {message.author.firstName} {message.author.lastName}

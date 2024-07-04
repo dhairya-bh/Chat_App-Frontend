@@ -63,14 +63,12 @@ export const MessageContainer = () => {
       e.key === 'Escape' && dispatch(setIsEditing(false));
     window.addEventListener('keydown', handleKeydown);
     return () => {
-      console.log('Removing keydown event listener');
       window.removeEventListener('keydown', handleKeydown);
     };
   }, [id]);
 
   useEffect(() => {
     return () => {
-      console.log('Unmounting');
       dispatch(resetMessageContainer());
     };
   }, [id]);
@@ -85,7 +83,7 @@ export const MessageContainer = () => {
     const nextMessage = messages[nextIndex];
     if (
       messages.length === nextIndex ||
-      currentMessage.author.id !== nextMessage.author.id
+      currentMessage.author.userId !== nextMessage.author.userId
     )
       return (
         <FormattedMessage
@@ -96,7 +94,7 @@ export const MessageContainer = () => {
           onEditMessageChange={onEditMessageChange}
         />
       );
-    if (currentMessage.author.id === nextMessage.author.id) {
+    if (currentMessage.author.userId === nextMessage.author.userId) {
       return (
         <MessageItemContainer
           key={m.id}

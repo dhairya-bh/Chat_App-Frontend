@@ -7,6 +7,7 @@ import { selectGroupById } from '../../store/groupSlice';
 import { selectType } from '../../store/selectedSlice';
 import { AuthContext } from '../../utils/context/AuthContext';
 import { MessagePanelHeaderStyle } from '../../utils/styles';
+import { PersonAdd } from 'akar-icons';
 
 export const MessagePanelHeader = () => {
   const { user } = useContext(AuthContext);
@@ -20,11 +21,18 @@ export const MessagePanelHeader = () => {
     selectGroupById(state, id!)
   );
   const displayName =
-    user?.id === conversation?.creator.id
+    user?.userId === conversation?.creator.userId
       ? `${conversation?.recipient.firstName} ${conversation?.recipient.lastName}`
       : `${conversation?.creator.firstName} ${conversation?.creator.lastName}`;
   const groupName = group?.title || 'Group';
   const headerTitle = type === 'group' ? groupName : displayName;
 
-  return <MessagePanelHeaderStyle>{headerTitle}</MessagePanelHeaderStyle>;
+  return (
+    <MessagePanelHeaderStyle>
+      <div>
+        <span>{headerTitle}</span>
+      </div>
+      {type === 'group' && <PersonAdd size={25} />}
+    </MessagePanelHeaderStyle>
+  );
 };

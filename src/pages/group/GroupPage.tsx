@@ -2,13 +2,13 @@ import { useContext, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Outlet, useParams } from 'react-router-dom';
 import { ConversationPanel } from '../../components/conversations/ConversationPanel';
+import { ConversationSidebar } from '../../components/sidebars/ConversationSidebar';
 import { AppDispatch } from '../../store';
-import { addGroupMessage } from '../../store/groupMessageSlice';
-import { fetchGroupsThunk } from '../../store/groupSlice';
+import { addGroupMessage, deleteGroupMessage } from '../../store/groupMessageSlice';
+import { addGroup, fetchGroupsThunk } from '../../store/groupSlice';
 import { updateType } from '../../store/selectedSlice';
 import { SocketContext } from '../../utils/context/SocketContext';
-import { Page } from '../../utils/styles';
-import { GroupMessageEventPayload } from '../../utils/types';
+import { Group, GroupMessageEventPayload } from '../../utils/types';
 
 export const GroupPage = () => {
   const { id } = useParams();
@@ -22,21 +22,30 @@ export const GroupPage = () => {
 
   useEffect(() => {
     socket.on('onGroupMessage', (payload: GroupMessageEventPayload) => {
-      console.log('Group Message Received');
       const { group, message } = payload;
-      console.log(group, message);
       dispatch(addGroupMessage(payload));
     });
 
+    socket.on('onGroupCreate', (payload: Group) => {
+      dispatch(addGroup(payload));
+    });
+
+    socket.on('onGroupMessageDelete',(payload) => {
+      dispatch(deleteGroupMessage(payload));
+  })
+
     return () => {
+      socket.off('onGroupCreate');
       socket.off('onGroupMessage');
+      socket.off('onGroupMessageDelete');
     };
   }, [id]);
 
   return (
-    <Page>
+    <>
+      <ConversationSidebar />
       {!id && <ConversationPanel />}
       <Outlet />
-    </Page>
+    </>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { postLoginUser } from '../../utils/api';
@@ -10,6 +10,7 @@ import {
 } from '../../utils/styles';
 import { UserCredentialsParams } from '../../utils/types';
 import styles from './index.module.scss';
+import { SocketContext } from '../../utils/context/SocketContext';
 
 export const LoginForm = () => {
   const {
@@ -18,10 +19,12 @@ export const LoginForm = () => {
     formState: { errors },
   } = useForm<UserCredentialsParams>();
   const navigate = useNavigate();
+  const socket = useContext(SocketContext);
 
   const onSubmit = async (data: UserCredentialsParams) => {
     try {
       await postLoginUser(data);
+      socket.connect();
       navigate('/conversations');
     } catch (err) {
       console.log(err);

@@ -6,14 +6,13 @@ import { UserSidebar } from '../components/sidebars/UserSidebar';
 import { AppDispatch } from '../store';
 import { fetchConversationsThunk } from '../store/conversationSlice';
 import { fetchGroupsThunk } from '../store/groupSlice';
-import { Page } from '../utils/styles';
+import { LayoutPage, Page } from '../utils/styles';
 
 export const AppPage = () => {
   return (
-    <Page>
+    <LayoutPage>
       <UserSidebar />
-      <ConversationSidebar />
       <Outlet />
-    </Page>
+    </LayoutPage>
   );
 };

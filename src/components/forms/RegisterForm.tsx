@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { postRegisterUser } from '../../utils/api';
 import {
   Button,
@@ -9,6 +9,7 @@ import {
 } from '../../utils/styles';
 import { CreateUserParams } from '../../utils/types';
 import styles from './index.module.scss';
+import { toast } from 'react-toastify';
 
 export const RegisterForm = () => {
   const {
@@ -18,13 +19,19 @@ export const RegisterForm = () => {
   } = useForm<CreateUserParams>();
 
   console.log(errors);
+  const navigate = useNavigate();
 
   const onSubmit = async (data: CreateUserParams) => {
-    console.log(data);
+
     try {
       await postRegisterUser(data);
+      navigate('/login');
+      toast.clearWaitingQueue();
+      toast.success('Account created!');
     } catch (err) {
       console.log(err);
+      toast.clearWaitingQueue();
+      toast.error('Error creating user');
     }
   };
 
