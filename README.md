@@ -1,46 +1,29 @@
-# Getting Started with Create React App
+# Chat Platform React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![preview](https://i.imgur.com/DQlHtCB.png)
 
-## Available Scripts
+This is the React project for the open-source Chat Platform I (Anson) am building from the ground up. To watch the full development process from the beginning, please see the up-to-date [playlist on YouTube](https://www.youtube.com/playlist?list=PL_cUvD4qzbkzS16TsnJDLbHuWBkKIbeVr). To see the back-end project, see the [Chat Platform NestJS repository](https://github.com/stuyy/chat-platform-nestjs).
 
-In the project directory, you can run:
+For any additional questions, you can always stop by my [livestream](https://youtube.com/ansonthedeveloper), connect with me on my [Discord Server](https://discord.gg/anson), or follow me [Twitter](https://twitter.com/ansonthedev).
 
-### `npm start`
+# Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Before you try to run this project locally, you must have both the React & NestJS project, as well as a SQL database. I use MySQL, but you can switch to another database like PostgreSQL very easily.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. Clone this repository and install all dependencies.
+2. Go to [Chat Platform NestJS repository](https://github.com/stuyy/chat-platform-nestjs) and follow all the instructions on setting up the backend.
+3. Run both projects using the `start:dev` script using either `npm`, `yarn`, or whatever package manager you use.
+4. There is no landing page, the main routes are:
+   - `/register` route to create an account
+   - `/login` to login to the app
+   - `/conversations` is where all the magic happens
 
-### `npm test`
+# License
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
-### `npm run build`
+Under this license, you may not use this project for:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Commercial Purposes
+2. Distributing this project after modifying it
+3. You may not use this without appropriate attribution

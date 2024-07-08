@@ -1,38 +1,44 @@
+import { useState, useContext } from 'react';
 import {
-  UserAvatar,
-  UserSidebarBottom,
-  UserSidebarItem,
+  UserSidebarFooter,
+  UserSidebarHeader,
+  UserSidebarScrollableContainer,
   UserSidebarStyle,
-  UserSidebarTop,
-  UserSidebarTopIcons,
 } from '../../utils/styles';
-import styles from './index.module.scss';
-import { ChatDots, Person, ArrowCycle } from 'akar-icons';
-import avatar from '../../__assets__/avatar_1.png';
-import { useState } from 'react';
-import { CreateConversationModal } from '../modals/CreateConversationModal';
-
+import { userSidebarItems } from '../../utils/constants';
+import { UserSidebarItem } from './items/UserSidebarItem';
+import { AuthContext } from '../../utils/context/AuthContext';
+import { UpdatePresenceStatusModal } from '../modals/UpdatePresenceStatusModal';
+import { RiLogoutCircleLine } from 'react-icons/ri';
+import { UserAvatar } from '../users/UserAvatar';
+import { logoutUser as logoutUserAPI } from '../../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 export const UserSidebar = () => {
-  const ICON_SIZE = 30;
-  const STROKE_WIDTH = 2;
   const [showModal, setShowModal] = useState(false);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const logoutUser = () => {
+    logoutUserAPI().finally(() => navigate('/login', { replace: true }));
+  };
 
   return (
     <>
-      {showModal && <CreateConversationModal setShowModal={setShowModal} />}
+      {showModal && <UpdatePresenceStatusModal setShowModal={setShowModal} />}
       <UserSidebarStyle>
-        <UserAvatar src={avatar} alt="avatar" width="55px" />
-        <hr className={styles.hr} />
-        <UserSidebarItem>
-          <ChatDots size={ICON_SIZE} strokeWidth={STROKE_WIDTH} />
-        </UserSidebarItem>
-        <UserSidebarItem active={true}>
-          <Person size={ICON_SIZE} strokeWidth={STROKE_WIDTH} />
-        </UserSidebarItem>
-        <UserSidebarItem>
-          <ArrowCycle size={ICON_SIZE} strokeWidth={STROKE_WIDTH} />
-        </UserSidebarItem>
+        <UserSidebarHeader>
+          <UserAvatar user={user!} onClick={() => setShowModal(true)} />
+        </UserSidebarHeader>
+        <UserSidebarScrollableContainer>
+          {userSidebarItems.map((item) => (
+            <UserSidebarItem item={item} />
+          ))}
+        </UserSidebarScrollableContainer>
+
+        <UserSidebarFooter>
+          <RiLogoutCircleLine size={30} onClick={() => logoutUser()} />
+        </UserSidebarFooter>
       </UserSidebarStyle>
     </>
   );

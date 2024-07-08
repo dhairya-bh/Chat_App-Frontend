@@ -5,7 +5,6 @@ import { MdClose } from 'react-icons/md';
 import { ConversationType } from '../../utils/types';
 import { CreateGroupForm } from '../forms/CreateGroupForm';
 
-
 type Props = {
   setShowModal: Dispatch<React.SetStateAction<boolean>>;
 };

@@ -1,4 +1,5 @@
 import { Dispatch, FC, useEffect, useState } from 'react';
+import { GroupRecipientsField } from '../recipients/GroupRecipientsField';
 import {
   InputContainer,
   InputLabel,
@@ -17,7 +18,6 @@ import { searchUsers } from '../../utils/api';
 import { RecipientResultContainer } from '../recipients/RecipientResultContainer';
 import { SelectedGroupRecipientChip } from '../recipients/SelectedGroupRecipientChip';
 import { createGroupThunk } from '../../store/groupSlice';
-import { GroupRecipientsField } from '../recipients/GroupRecipientsFields';
 
 type Props = {
   setShowModal: Dispatch<React.SetStateAction<boolean>>;
@@ -39,6 +39,7 @@ export const CreateGroupForm: FC<Props> = ({ setShowModal }) => {
       setSearching(true);
       searchUsers(debouncedQuery)
         .then(({ data }) => {
+          console.log(data);
           setResults(data);
         })
         .catch((err) => console.log(err))
@@ -49,10 +50,12 @@ export const CreateGroupForm: FC<Props> = ({ setShowModal }) => {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (selectedRecipients.length === 0 || !message || !title) return;
-    const users = selectedRecipients.map((user) => user.email);
+    const users = selectedRecipients.map((user) => user.username);
     return dispatch(createGroupThunk({ title, users }))
       .unwrap()
       .then(({ data }) => {
+        console.log(data);
+        console.log('done');
         setShowModal(false);
         navigate(`/groups/${data.id}`);
       })
@@ -60,12 +63,12 @@ export const CreateGroupForm: FC<Props> = ({ setShowModal }) => {
   };
 
   const handleUserSelect = (user: User) => {
-    const exists = selectedRecipients.find((u) => u.userId === user.userId);
+    const exists = selectedRecipients.find((u) => u.id === user.id);
     if (!exists) setSelectedRecipients((prev) => [...prev, user]);
   };
 
   const removeUser = (user: User) =>
-    setSelectedRecipients((prev) => prev.filter((u) => u.userId !== user.userId));
+    setSelectedRecipients((prev) => prev.filter((u) => u.id !== user.id));
 
   return (
     <form className={styles.createConversationForm} onSubmit={onSubmit}>

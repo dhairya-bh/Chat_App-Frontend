@@ -1,71 +1,51 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { AppDispatch, RootState } from '../../store';
+import { GroupMessageType, MessageType } from '../../utils/types';
+import { SelectedMessageContextMenu } from '../context-menus/SelectedMessageContextMenu';
+import { selectConversationMessage } from '../../store/messages/messageSlice';
+import { selectGroupMessage } from '../../store/groupMessageSlice';
+import { selectType } from '../../store/selectedSlice';
+import { MessageItemHeader } from './MessageItemHeader';
+import { MessageItemContainerBody } from './MessageItemContainerBody';
+import { useHandleClick, useKeydown } from '../../utils/hooks';
+import { UserAvatar } from '../users/UserAvatar';
 import {
   MessageContainerStyle,
   MessageItemContainer,
-  MessageItemContent,
+  MessageItemDetails,
 } from '../../utils/styles';
-import { GroupMessageType, MessageType } from '../../utils/types';
-import { AuthContext } from '../../utils/context/AuthContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../store';
-import { useParams } from 'react-router-dom';
-import { SelectedMessageContextMenu } from '../context-menus/SelectedMessageContextMenu';
-import { FormattedMessage } from './FormattedMessage';
-import { EditMessageContainer } from './EditMessageContainer';
-import { selectConversationMessage } from '../../store/messageSlice';
-import { selectGroupMessage } from '../../store/groupMessageSlice';
-import { selectType } from '../../store/selectedSlice';
 import {
   editMessageContent,
   resetMessageContainer,
+  setContextMenuLocation,
   setIsEditing,
   setSelectedMessage,
+  toggleContextMenu,
 } from '../../store/messageContainerSlice';
+import { SystemMessage } from './system/SystemMessage';
+import { SystemMessageList } from './system/SystemMessageList';
 
 export const MessageContainer = () => {
-  const [showMenu, setShowMenu] = useState(false);
-  const [points, setPoints] = useState({ x: 0, y: 0 });
-  const { user } = useContext(AuthContext);
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
-  const { isEditingMessage, messageBeingEdited } = useSelector(
-    (state: RootState) => state.messageContainer
-  );
   const conversationMessages = useSelector((state: RootState) =>
-    selectConversationMessage(state, id!)
+    selectConversationMessage(state, parseInt(id!))
   );
   const groupMessages = useSelector((state: RootState) =>
-    selectGroupMessage(state, id!)
+    selectGroupMessage(state, parseInt(id!))
   );
   const selectedType = useSelector((state: RootState) => selectType(state));
+  const { showContextMenu } = useSelector(
+    (state: RootState) => state.messageContainer
+  );
+  const handleKeydown = (e: KeyboardEvent) =>
+    e.key === 'Escape' && dispatch(setIsEditing(false));
+  const handleClick = () => dispatch(toggleContextMenu(false));
 
-  const onContextMenu = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    message: MessageType | GroupMessageType
-  ) => {
-    e.preventDefault();
-    setShowMenu(true);
-    setPoints({ x: e.pageX, y: e.pageY });
-    dispatch(setSelectedMessage(message));
-  };
-
-  const onEditMessageChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    dispatch(editMessageContent(e.target.value));
-
-  useEffect(() => {
-    const handleClick = () => setShowMenu(false);
-    window.addEventListener('click', handleClick);
-    return () => window.removeEventListener('click', handleClick);
-  }, [id]);
-
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) =>
-      e.key === 'Escape' && dispatch(setIsEditing(false));
-    window.addEventListener('keydown', handleKeydown);
-    return () => {
-      window.removeEventListener('keydown', handleKeydown);
-    };
-  }, [id]);
+  useKeydown(handleKeydown, [id]);
+  useHandleClick(handleClick, [id]);
 
   useEffect(() => {
     return () => {
@@ -73,57 +53,72 @@ export const MessageContainer = () => {
     };
   }, [id]);
 
+  const onContextMenu = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    message: MessageType | GroupMessageType
+  ) => {
+    e.preventDefault();
+    dispatch(toggleContextMenu(true));
+    dispatch(setContextMenuLocation({ x: e.pageX, y: e.pageY }));
+    dispatch(setSelectedMessage(message));
+  };
+
+  const onEditMessageChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    dispatch(editMessageContent(e.target.value));
+
   const mapMessages = (
-    m: MessageType | GroupMessageType,
+    message: MessageType | GroupMessageType,
     index: number,
     messages: MessageType[] | GroupMessageType[]
   ) => {
-    const nextIndex = index + 1;
     const currentMessage = messages[index];
-    const nextMessage = messages[nextIndex];
-    if (
-      messages.length === nextIndex ||
-      currentMessage.author.userId !== nextMessage.author.userId
-    )
-      return (
-        <FormattedMessage
-          onContextMenu={(e) => onContextMenu(e, m)}
-          key={m.id}
-          user={user}
-          message={m}
-          onEditMessageChange={onEditMessageChange}
-        />
-      );
-    if (currentMessage.author.userId === nextMessage.author.userId) {
-      return (
-        <MessageItemContainer
-          key={m.id}
-          onContextMenu={(e) => onContextMenu(e, m)}
-        >
-          {isEditingMessage && m.id === messageBeingEdited?.id ? (
-            <MessageItemContent padding="0 0 0 70px">
-              <EditMessageContainer onEditMessageChange={onEditMessageChange} />
-            </MessageItemContent>
-          ) : (
-            <MessageItemContent padding="0 0 0 70px">
-              {m.content}
-            </MessageItemContent>
-          )}
-        </MessageItemContainer>
-      );
-    }
-  };
-
-  const formatMessages = () => {
-    if (selectedType === 'private')
-      return conversationMessages?.messages.map(mapMessages);
-    return groupMessages?.messages.map(mapMessages);
+    const nextMessage = messages[index + 1];
+    const showMessageHeader =
+      messages.length === index + 1 ||
+      currentMessage.author.id !== nextMessage.author.id;
+    return (
+      <MessageItemContainer
+        key={message.id}
+        onContextMenu={(e) => onContextMenu(e, message)}
+      >
+        {showMessageHeader && <UserAvatar user={message.author} />}
+        {showMessageHeader ? (
+          <MessageItemDetails>
+            <MessageItemHeader message={message} />
+            <MessageItemContainerBody
+              message={message}
+              onEditMessageChange={onEditMessageChange}
+              padding="8px 0 0 0"
+            />
+          </MessageItemDetails>
+        ) : (
+          <MessageItemContainerBody
+            message={message}
+            onEditMessageChange={onEditMessageChange}
+            padding="0 0 0 70px"
+          />
+        )}
+      </MessageItemContainer>
+    );
   };
 
   return (
-    <MessageContainerStyle>
-      <>{formatMessages()}</>
-      {showMenu && <SelectedMessageContextMenu points={points} />}
+    <MessageContainerStyle
+      onScroll={(e) => {
+        const node = e.target as HTMLDivElement;
+        const scrollTopMax = node.scrollHeight - node.clientHeight;
+        if (-scrollTopMax === node.scrollTop) {
+          console.log('');
+        }
+      }}
+    >
+      <>
+        <SystemMessageList />
+        {selectedType === 'private'
+          ? conversationMessages?.messages.map(mapMessages)
+          : groupMessages?.messages.map(mapMessages)}
+      </>
+      {showContextMenu && <SelectedMessageContextMenu />}
     </MessageContainerStyle>
   );
 };

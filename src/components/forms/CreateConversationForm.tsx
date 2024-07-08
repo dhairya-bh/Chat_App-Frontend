@@ -35,6 +35,7 @@ export const CreateConversationForm: FC<Props> = ({ setShowModal }) => {
       setSearching(true);
       searchUsers(debouncedQuery)
         .then(({ data }) => {
+          console.log(data);
           setUserResults(data);
         })
         .catch((err) => console.log(err))
@@ -46,10 +47,12 @@ export const CreateConversationForm: FC<Props> = ({ setShowModal }) => {
     e.preventDefault();
     if (!message || !selectedUser) return;
     return dispatch(
-      createConversationThunk({ email: selectedUser.email, message })
+      createConversationThunk({ username: selectedUser.username, message })
     )
       .unwrap()
       .then(({ data }) => {
+        console.log(data);
+        console.log('done');
         setShowModal(false);
         navigate(`/conversations/${data.id}`);
       })

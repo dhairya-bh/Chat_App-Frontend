@@ -20,10 +20,10 @@ export const RecipientResultContainer: FC<Props> = ({
       <RecipientScrollableItemContainer>
         {userResults.map((user) => (
           <RecipientResultItem
-            key={user.userId}
+            key={user.id}
             onClick={() => handleUserSelect(user)}
           >
-            <span>{user.email}</span>
+            <span>{user.username}</span>
           </RecipientResultItem>
         ))}
       </RecipientScrollableItemContainer>
